@@ -6,6 +6,7 @@
 /// All spoken messages follow the 2-second rule: short enough to
 /// be understood in one phrase while riding.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -82,7 +83,12 @@ class VoiceService {
 
   Future<void> _configureTts(String language) async {
     await _tts.setLanguage(language);
-    await _tts.setSpeechRate(0.5); // Calm, clear pace for riders
+    // flutter_tts rate scales differ per platform: on Android and web,
+    // 1.0 is normal speed and 0.5 is half speed (a slow-motion effect);
+    // on iOS/macOS, ~0.5 is the normal rate. Pick per platform.
+    final isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+    await _tts.setSpeechRate(isApple ? 0.52 : 1.0);
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
 
