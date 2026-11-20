@@ -8,8 +8,8 @@ class AppConstants {
   AppConstants._();
 
   // ── API Keys (read from lib/config/api_keys.dart) ────────────────
-  static const String googleMapsApiKey = keys.googleMapsApiKey;
-  static const String geminiApiKey = keys.geminiApiKey;
+  static final String googleMapsApiKey = keys.googleMapsApiKey;
+  static final String geminiApiKey = keys.geminiApiKey;
 
   // ── Navigation ──────────────────────────────────────────────────
   static const double turnWarningDistanceMeters = 500.0;
