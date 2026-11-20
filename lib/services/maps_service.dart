@@ -218,7 +218,7 @@ class MapsService {
   }
 
   List<PlaceSuggestion> _getMockJaipurSuggestions(String query) {
-    return const [
+    const allSuggestions = [
       PlaceSuggestion(
         placeId: 'POORNIMA_INST_JPR',
         mainText: 'Poornima Institute of Engineering & Technology',
@@ -239,17 +239,193 @@ class MapsService {
         mainText: 'World Trade Park (WTP)',
         secondaryText: 'Jawahar Lal Nehru Marg, Malviya Nagar, Jaipur',
       ),
+      PlaceSuggestion(
+        placeId: 'JAWAHAR_CIRCLE_JPR',
+        mainText: 'Jawahar Circle',
+        secondaryText: 'Jawahar Lal Nehru Marg, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'MNIT_JAIPUR',
+        mainText: 'MNIT Jaipur',
+        secondaryText: 'Jawahar Lal Nehru Marg, Malviya Nagar, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'JAIPUR_AIRPORT',
+        mainText: 'Jaipur International Airport',
+        secondaryText: 'Sanganer, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'JAIPUR_JUNCTION',
+        mainText: 'Jaipur Junction Railway Station',
+        secondaryText: 'Station Road, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'SINDHI_CAMP_JPR',
+        mainText: 'Sindhi Camp Bus Stand',
+        secondaryText: 'Station Road, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'DURGAPURA_STN_JPR',
+        mainText: 'Durgapura Railway Station',
+        secondaryText: 'Tonk Road, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'HAWA_MAHAL_JPR',
+        mainText: 'Hawa Mahal',
+        secondaryText: 'Badi Chaupar, Old City, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'AMER_FORT_JPR',
+        mainText: 'Amer Fort',
+        secondaryText: 'Delhi Road, Amer, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'RAJ_MANDIR_JPR',
+        mainText: 'Raj Mandir Cinema',
+        secondaryText: 'MI Road, Panch Batti, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'RAJA_PARK_JPR',
+        mainText: 'Raja Park',
+        secondaryText: 'Raja Park Main Market, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'C_SCHEME_JPR',
+        mainText: 'C-Scheme (Ahinsa Circle)',
+        secondaryText: 'Sardar Patel Marg, C-Scheme, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'VAISHALI_NAGAR_JPR',
+        mainText: 'Vaishali Nagar',
+        secondaryText: 'Amrapali Circle, Vaishali Nagar, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'MANSAROVAR_METRO_JPR',
+        mainText: 'Mansarovar Metro Station',
+        secondaryText: 'Rajpath, Mansarovar, Jaipur',
+      ),
+      PlaceSuggestion(
+        placeId: 'JAGATPURA_JPR',
+        mainText: 'Jagatpura',
+        secondaryText: 'Mahal Road, Jagatpura, Jaipur',
+      ),
     ];
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return allSuggestions;
+    return allSuggestions
+        .where((p) =>
+            p.mainText.toLowerCase().contains(q) ||
+            p.secondaryText.toLowerCase().contains(q))
+        .toList();
   }
 
   PlaceLocation _getMockPlaceLocation(String placeId) {
-    if (placeId.contains('POORNIMA')) {
-      return const PlaceLocation(
+    const locations = <String, PlaceLocation>{
+      'POORNIMA': PlaceLocation(
         lat: 26.8764,
         lng: 75.7640,
         name: 'Poornima Institute',
         address: 'ISI-2, RIICO Institutional Area, Sitapura, Jaipur',
-      );
+      ),
+      'WTP': PlaceLocation(
+        lat: 26.8533,
+        lng: 75.8049,
+        name: 'World Trade Park (WTP)',
+        address: 'Jawahar Lal Nehru Marg, Malviya Nagar, Jaipur',
+      ),
+      'JAWAHAR_CIRCLE': PlaceLocation(
+        lat: 26.8402,
+        lng: 75.8002,
+        name: 'Jawahar Circle',
+        address: 'Jawahar Lal Nehru Marg, Jaipur',
+      ),
+      'MNIT': PlaceLocation(
+        lat: 26.8639,
+        lng: 75.8107,
+        name: 'MNIT Jaipur',
+        address: 'Jawahar Lal Nehru Marg, Malviya Nagar, Jaipur',
+      ),
+      'AIRPORT': PlaceLocation(
+        lat: 26.8242,
+        lng: 75.8122,
+        name: 'Jaipur International Airport',
+        address: 'Sanganer, Jaipur',
+      ),
+      'JUNCTION': PlaceLocation(
+        lat: 26.9196,
+        lng: 75.7870,
+        name: 'Jaipur Junction Railway Station',
+        address: 'Station Road, Jaipur',
+      ),
+      'SINDHI_CAMP': PlaceLocation(
+        lat: 26.9228,
+        lng: 75.7997,
+        name: 'Sindhi Camp Bus Stand',
+        address: 'Station Road, Jaipur',
+      ),
+      'DURGAPURA': PlaceLocation(
+        lat: 26.8547,
+        lng: 75.7874,
+        name: 'Durgapura Railway Station',
+        address: 'Tonk Road, Jaipur',
+      ),
+      'HAWA_MAHAL': PlaceLocation(
+        lat: 26.9239,
+        lng: 75.8267,
+        name: 'Hawa Mahal',
+        address: 'Badi Chaupar, Old City, Jaipur',
+      ),
+      'AMER_FORT': PlaceLocation(
+        lat: 26.9855,
+        lng: 75.8513,
+        name: 'Amer Fort',
+        address: 'Delhi Road, Amer, Jaipur',
+      ),
+      'RAJ_MANDIR': PlaceLocation(
+        lat: 26.9155,
+        lng: 75.8106,
+        name: 'Raj Mandir Cinema',
+        address: 'MI Road, Panch Batti, Jaipur',
+      ),
+      'RAJA_PARK': PlaceLocation(
+        lat: 26.8997,
+        lng: 75.8183,
+        name: 'Raja Park',
+        address: 'Raja Park Main Market, Jaipur',
+      ),
+      'C_SCHEME': PlaceLocation(
+        lat: 26.9128,
+        lng: 75.8009,
+        name: 'C-Scheme (Ahinsa Circle)',
+        address: 'Sardar Patel Marg, C-Scheme, Jaipur',
+      ),
+      'VAISHALI': PlaceLocation(
+        lat: 26.9148,
+        lng: 75.7479,
+        name: 'Vaishali Nagar',
+        address: 'Amrapali Circle, Vaishali Nagar, Jaipur',
+      ),
+      'MANSAROVAR': PlaceLocation(
+        lat: 26.8798,
+        lng: 75.7507,
+        name: 'Mansarovar Metro Station',
+        address: 'Rajpath, Mansarovar, Jaipur',
+      ),
+      'JAGATPURA': PlaceLocation(
+        lat: 26.8330,
+        lng: 75.8660,
+        name: 'Jagatpura',
+        address: 'Mahal Road, Jagatpura, Jaipur',
+      ),
+      'SITAPURA': PlaceLocation(
+        lat: 26.8510,
+        lng: 75.7890,
+        name: 'Sitapura Industrial Area Circle',
+        address: 'Tonk Road, Sitapura, Jaipur',
+      ),
+    };
+    for (final entry in locations.entries) {
+      if (placeId.contains(entry.key)) return entry.value;
     }
     return const PlaceLocation(
       lat: 26.8528,
