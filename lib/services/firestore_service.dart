@@ -7,6 +7,7 @@
 ///   4. Pre-calculated accident risk zones for the map layer.
 
 import 'dart:math';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../app/constants/app_constants.dart';
@@ -19,10 +20,16 @@ class FirestoreService {
 
   final FirebaseFirestore? _customDb;
 
+  /// Whether Firebase is initialized and live Firestore is ready.
+  bool get isConfigured => _db != null;
+
   FirebaseFirestore? get _db {
     if (_customDb != null) return _customDb;
     try {
-      return FirebaseFirestore.instance;
+      if (Firebase.apps.isNotEmpty) {
+        return FirebaseFirestore.instance;
+      }
+      return null;
     } catch (_) {
       return null;
     }

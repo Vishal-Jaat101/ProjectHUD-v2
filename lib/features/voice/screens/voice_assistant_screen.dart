@@ -12,10 +12,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:project_hud/app/providers/app_providers.dart';
 import 'package:project_hud/app/theme/app_theme.dart';
+import 'package:project_hud/features/hazards/providers/hazard_providers.dart';
 import 'package:project_hud/features/voice/providers/voice_providers.dart';
 import 'package:project_hud/features/voice/services/gemini_service.dart';
 import 'package:project_hud/features/voice/services/voice_service.dart';
+import 'package:project_hud/models/hazard_models.dart';
 
 /// Full-screen voice assistant overlay.
 ///
@@ -129,6 +132,8 @@ class _VoiceAssistantScreenState extends ConsumerState<VoiceAssistantScreen>
 
     if (!mounted) return;
 
+    _executeAssistantAction(response);
+
     ref.read(assistantResponseProvider.notifier).state = response.text;
     ref.read(voiceStateProvider.notifier).state = VoiceState.speaking;
 
@@ -141,6 +146,43 @@ class _VoiceAssistantScreenState extends ConsumerState<VoiceAssistantScreen>
 
     // Auto-dismiss after the response is spoken.
     _autoDismissTimer = Timer(const Duration(seconds: 2), _dismiss);
+  }
+
+  void _executeAssistantAction(AssistantResponse response) {
+    if (response.action == AssistantAction.reportHazard) {
+      final hazardTypeStr = response.actionData['hazardType'] as String?;
+      final hazardType = HazardType.values.firstWhere(
+        (h) => h.name.toLowerCase() == hazardTypeStr?.toLowerCase(),
+        orElse: () => HazardType.pothole,
+      );
+      final rideState = ref.read(rideStateProvider);
+      final lat = rideState.currentLat != 0 ? rideState.currentLat : 26.8528;
+      final lng = rideState.currentLng != 0 ? rideState.currentLng : 75.8084;
+      ref.read(firestoreServiceProvider).reportHazard(
+        type: hazardType,
+        lat: lat,
+        lng: lng,
+        anonymisedUserId: 'rider_voice_${DateTime.now().millisecondsSinceEpoch}',
+      );
+      final newHazard = HazardReport(
+        id: 'HAZ_${DateTime.now().millisecondsSinceEpoch}',
+        type: hazardType,
+        latitude: lat,
+        longitude: lng,
+        reportedAt: DateTime.now(),
+        reportedBy: 'rider_voice',
+        confirmations: 1,
+        denials: 0,
+        isVerified: false,
+      );
+      final list = ref.read(seededHazardsProvider);
+      ref.read(seededHazardsProvider.notifier).state = [newHazard, ...list];
+    } else if (response.action == AssistantAction.confirmHazard) {
+      final confirmed = response.actionData['confirmed'] == true;
+      ref.read(hazardConfirmationPendingProvider.notifier).resolve(confirmed);
+    } else if (response.action == AssistantAction.stopNavigation) {
+      ref.read(rideStateProvider.notifier).endRide();
+    }
   }
 
   void _dismiss() {

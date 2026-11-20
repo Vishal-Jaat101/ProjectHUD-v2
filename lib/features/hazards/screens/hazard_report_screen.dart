@@ -146,6 +146,14 @@ class HazardReportBottomSheet extends ConsumerWidget {
       isVerified: false,
     );
 
+    // Write to Firestore if Firebase is configured
+    ref.read(firestoreServiceProvider).reportHazard(
+      type: type,
+      lat: lat,
+      lng: lng,
+      anonymisedUserId: 'rider_${DateTime.now().millisecondsSinceEpoch}',
+    );
+
     final currentList = ref.read(seededHazardsProvider);
     ref.read(seededHazardsProvider.notifier).state = [
       ...currentList,

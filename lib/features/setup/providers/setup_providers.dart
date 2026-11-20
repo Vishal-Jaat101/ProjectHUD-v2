@@ -97,3 +97,24 @@ final recentDestinationsProvider = StateNotifierProvider<
     RecentDestinationsNotifier, List<RecentDestination>>((ref) {
   return RecentDestinationsNotifier();
 });
+
+// ── Selected Destination for Real Navigation ─────────────────────────
+
+class SelectedDestination {
+  final String placeId;
+  final String name;
+  final String address;
+  final double lat;
+  final double lng;
+
+  const SelectedDestination({
+    required this.placeId,
+    required this.name,
+    required this.address,
+    required this.lat,
+    required this.lng,
+  });
+}
+
+final selectedDestinationProvider =
+    StateProvider<SelectedDestination?>((ref) => null);

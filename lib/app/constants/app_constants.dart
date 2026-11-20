@@ -2,13 +2,14 @@
 ///
 /// Safety rule: no interaction requires reading or typing while riding.
 
+import '../../config/api_keys.dart' as keys;
+
 class AppConstants {
   AppConstants._();
 
-  // ── API Keys (replace with real keys) ───────────────────────────
-  // TODO: Move to environment variables or Firebase Remote Config
-  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
-  static const String geminiApiKey = 'YOUR_GEMINI_API_KEY';
+  // ── API Keys (read from lib/config/api_keys.dart) ────────────────
+  static const String googleMapsApiKey = keys.googleMapsApiKey;
+  static const String geminiApiKey = keys.geminiApiKey;
 
   // ── Navigation ──────────────────────────────────────────────────
   static const double turnWarningDistanceMeters = 500.0;

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="ProjectHUD - Smart Heads-Up Display for Indian Two-Wheeler Riders">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ProjectHUD">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>ProjectHUD</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      background-color: #121212;
+      margin: 0;
+      padding: 0;
+      color: #FFB300;
+      font-family: sans-serif;
+    }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+    }
+    .loading-title {
+      color: #FFB300;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .loading-subtitle {
+      color: #888888;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-container" id="loading">
+    <div class="loading-title">ProjectHUD</div>
+    <div class="loading-subtitle">Initializing Real Product Mode...</div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

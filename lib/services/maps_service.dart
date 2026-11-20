@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../app/constants/app_constants.dart';
+import '../config/api_keys.dart';
 import '../models/navigation_models.dart';
 
 /// Represents a place autocomplete suggestion.
@@ -56,7 +57,12 @@ class MapsService {
   final http.Client _client;
 
   static const _baseUrl = 'https://maps.googleapis.com/maps/api';
-  String get _key => AppConstants.googleMapsApiKey;
+  String get _key => googleMapsApiKey;
+
+  bool get isKeyConfigured =>
+      googleMapsApiKey.isNotEmpty &&
+      googleMapsApiKey != 'PASTE_MAPS_KEY' &&
+      googleMapsApiKey != 'YOUR_GOOGLE_MAPS_API_KEY';
 
   // ── Places Autocomplete ───────────────────────────────────────────
 
@@ -73,7 +79,7 @@ class MapsService {
     if (query.trim().isEmpty) return [];
 
     // Fallback mock places if API key is not configured or offline
-    if (_key == 'YOUR_GOOGLE_MAPS_API_KEY' || _key.isEmpty) {
+    if (!isKeyConfigured) {
       return _getMockJaipurSuggestions(query);
     }
 
@@ -112,7 +118,7 @@ class MapsService {
 
   /// Fetches lat/lng and name for a [placeId].
   Future<PlaceLocation?> placeDetails(String placeId) async {
-    if (_key == 'YOUR_GOOGLE_MAPS_API_KEY' || _key.isEmpty) {
+    if (!isKeyConfigured) {
       return _getMockPlaceLocation(placeId);
     }
 
@@ -158,7 +164,7 @@ class MapsService {
     required String destinationName,
     String mode = 'driving',
   }) async {
-    if (_key == 'YOUR_GOOGLE_MAPS_API_KEY' || _key.isEmpty) {
+    if (!isKeyConfigured) {
       return _getMockRouteData(destLat, destLng, destinationName);
     }
 

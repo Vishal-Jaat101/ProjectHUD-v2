@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import 'package:project_hud/app/constants/app_constants.dart';
+import 'package:project_hud/config/api_keys.dart';
 
 // ── Assistant Response Model ───────────────────────────────────────
 
@@ -164,13 +165,17 @@ If no action matches, use action "none" with an empty actionData.
     }
 
     // Graceful offline fallback if API key is not configured
-    if (AppConstants.geminiApiKey == 'YOUR_GEMINI_API_KEY' || AppConstants.geminiApiKey.isEmpty) {
+    final isKeyConfigured = geminiApiKey.isNotEmpty &&
+        geminiApiKey != 'PASTE_GEMINI_KEY' &&
+        geminiApiKey != 'YOUR_GEMINI_API_KEY';
+
+    if (!isKeyConfigured) {
       return _localRuleBasedFallback(userSpeech, rideContext);
     }
 
     try {
       final url =
-          '$_baseUrl/models/$_model:generateContent?key=${AppConstants.geminiApiKey}';
+          '$_baseUrl/models/$_model:generateContent?key=$geminiApiKey';
 
       final body = {
         'system_instruction': {

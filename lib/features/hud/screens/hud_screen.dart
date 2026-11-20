@@ -9,9 +9,13 @@
 ///   5. Screen stays awake continuously.
 ///   6. Single tap to report hazard (when stopped), voice-first while moving.
 
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -24,6 +28,7 @@ import '../../hazards/providers/hazard_providers.dart';
 import '../../hazards/screens/hazard_report_screen.dart';
 import '../../hazards/widgets/still_there_dialog.dart';
 import '../../voice/screens/voice_assistant_screen.dart';
+import '../../voice/services/voice_service.dart';
 import '../providers/hud_providers.dart';
 import '../widgets/eta_strip_widget.dart';
 import '../widgets/hazard_banner_widget.dart';
@@ -38,6 +43,11 @@ class HUDScreen extends ConsumerStatefulWidget {
 }
 
 class _HUDScreenState extends ConsumerState<HUDScreen> {
+  StreamSubscription<Position>? _positionSubscription;
+  final VoiceService _voiceService = VoiceService();
+  final Set<int> _announced500m = {};
+  final Set<int> _announced100m = {};
+
   @override
   void initState() {
     super.initState();
@@ -46,10 +56,150 @@ class _HUDScreenState extends ConsumerState<HUDScreen> {
 
     // Hide system bars for complete immersive HUD experience
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _voiceService.initialise();
+    _startLiveGpsTracking();
+  }
+
+  void _startLiveGpsTracking() {
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 2, // Every 2 meters
+      ),
+    ).listen(
+      _onGpsUpdate,
+      onError: (_) {
+        // Handle transient GPS errors silently without interrupting HUD
+      },
+    );
+  }
+
+  void _onGpsUpdate(Position position) {
+    if (!mounted) return;
+
+    // 1. Calculate real speed in km/h directly from GPS stream (m/s * 3.6)
+    final speedMps = position.speed >= 0 ? position.speed : 0.0;
+    final speedKmh = (speedMps * 3.6).clamp(0.0, 180.0);
+
+    // 2. Update rideState position & speed from real GPS
+    ref.read(rideStateProvider.notifier).updatePosition(
+          lat: position.latitude,
+          lng: position.longitude,
+          bearing: position.heading,
+          speedKmh: speedKmh,
+        );
+
+    // 3. Proximity check for hazards ("Still there?" prompt)
+    ref.read(hazardConfirmationPendingProvider.notifier).checkProximity(
+          position.latitude,
+          position.longitude,
+        );
+
+    // 4. Update route progress against active Google Directions route
+    final route = ref.read(activeRouteProvider);
+    final rideState = ref.read(rideStateProvider);
+    if (route != null && route.steps.isNotEmpty) {
+      final currentIdx =
+          rideState.currentStepIndex.clamp(0, route.steps.length - 1);
+      final currentStep = route.steps[currentIdx];
+
+      final distToStepEnd = _calculateDistance(
+        position.latitude,
+        position.longitude,
+        currentStep.endLat,
+        currentStep.endLng,
+      );
+
+      // Voice announcements at 500m & 100m marks
+      if (distToStepEnd <= 500 &&
+          distToStepEnd > 450 &&
+          !_announced500m.contains(currentIdx)) {
+        _announced500m.add(currentIdx);
+        _voiceService.speak('In 500 metres, ${currentStep.instruction}');
+      } else if (distToStepEnd <= 100 &&
+          distToStepEnd > 50 &&
+          !_announced100m.contains(currentIdx)) {
+        _announced100m.add(currentIdx);
+        _voiceService.speak(currentStep.instruction);
+      }
+
+      // Step completion threshold: within 25m of maneuver point
+      if (distToStepEnd <= 25 && currentIdx < route.steps.length - 1) {
+        final nextIdx = currentIdx + 1;
+        final nextStep = route.steps[nextIdx];
+        _voiceService.speak(nextStep.instruction);
+
+        ref.read(rideStateProvider.notifier).updateNavigation(
+              stepIndex: nextIdx,
+              distanceToNextStep: _calculateDistance(
+                position.latitude,
+                position.longitude,
+                nextStep.endLat,
+                nextStep.endLng,
+              ),
+              remainingDistance: (rideState.remainingDistanceMeters -
+                      currentStep.distanceMeters)
+                  .clamp(0, double.infinity),
+              remainingDuration: (rideState.remainingDurationSeconds -
+                      currentStep.durationSeconds)
+                  .clamp(0, double.infinity),
+              distanceTravelled: rideState.distanceTravelledMeters +
+                  currentStep.distanceMeters,
+            );
+      } else {
+        ref.read(rideStateProvider.notifier).updateNavigation(
+              stepIndex: currentIdx,
+              distanceToNextStep: distToStepEnd,
+              remainingDistance: rideState.remainingDistanceMeters,
+              remainingDuration: rideState.remainingDurationSeconds,
+              distanceTravelled: rideState.distanceTravelledMeters,
+            );
+      }
+
+      // Final destination arrival check
+      final dest = ref.read(hudDestinationProvider);
+      if (dest != null) {
+        final distToDest = _calculateDistance(
+          position.latitude,
+          position.longitude,
+          dest.lat,
+          dest.lng,
+        );
+        if (distToDest <= 30 && currentIdx >= route.steps.length - 1) {
+          _voiceService
+              .speak('You have arrived at your destination: ${dest.name}');
+          ref.read(rideStateProvider.notifier).endRide();
+          if (mounted) {
+            context.go('/ride-summary');
+          }
+        }
+      }
+    }
+  }
+
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const r = 6371000.0;
+    final dLat = (lat2 - lat1) * pi / 180.0;
+    final dLon = (lon2 - lon1) * pi / 180.0;
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * pi / 180.0) *
+            cos(lat2 * pi / 180.0) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return r * c;
   }
 
   @override
   void dispose() {
+    _positionSubscription?.cancel();
+    _voiceService.stopListening();
     WakelockPlus.disable();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,

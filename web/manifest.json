@@ -1,0 +1,11 @@
+{
+    "name": "ProjectHUD",
+    "short_name": "ProjectHUD",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#FFB300",
+    "description": "ProjectHUD - Smart Heads-Up Display for Indian Two-Wheeler Riders",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}

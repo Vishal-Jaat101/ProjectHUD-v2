@@ -126,6 +126,14 @@ class HazardConfirmationNotifier extends StateNotifier<HazardReport?> {
   void resolve(bool stillThere) {
     if (state != null) {
       final current = state!;
+      // Update Firestore when configured
+      final firestore = _ref.read(firestoreServiceProvider);
+      if (stillThere) {
+        firestore.confirmHazard(current.id, 'rider_local');
+      } else {
+        firestore.denyHazard(current.id, 'rider_local');
+      }
+
       final list = _ref.read(seededHazardsProvider);
       final idx = list.indexWhere((h) => h.id == current.id);
       if (idx != -1) {

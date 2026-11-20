@@ -236,12 +236,25 @@ class _DestinationSearchScreenState
 
     if (location == null || !mounted) return;
 
+    // Store as selected destination for navigation
+    ref.read(selectedDestinationProvider.notifier).state = SelectedDestination(
+      placeId: suggestion.placeId,
+      name: location.name.isNotEmpty ? location.name : suggestion.mainText,
+      address: location.address.isNotEmpty
+          ? location.address
+          : suggestion.secondaryText,
+      lat: location.lat,
+      lng: location.lng,
+    );
+
     // Store as recent destination
     ref.read(recentDestinationsProvider.notifier).add(
           RecentDestination(
             placeId: suggestion.placeId,
-            name: suggestion.mainText,
-            address: suggestion.secondaryText,
+            name: location.name.isNotEmpty ? location.name : suggestion.mainText,
+            address: location.address.isNotEmpty
+                ? location.address
+                : suggestion.secondaryText,
             visitedAt: DateTime.now(),
           ),
         );
@@ -249,8 +262,6 @@ class _DestinationSearchScreenState
     // Clear search state
     ref.read(searchQueryProvider.notifier).state = '';
 
-    // TODO: Fetch directions and start ride via app_providers.
-    // For now, pop back to home.
     if (mounted) {
       context.pop();
     }

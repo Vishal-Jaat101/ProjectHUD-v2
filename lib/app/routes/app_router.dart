@@ -14,6 +14,7 @@ import '../../features/gig_integration/screens/gig_import_screen.dart';
 import '../../features/risk_zones/screens/risk_zones_screen.dart';
 import '../../features/explainer/screens/explainer_screen.dart';
 import '../../features/voice/screens/voice_assistant_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -82,6 +83,11 @@ final appRouter = GoRouter(
       path: '/voice-assistant',
       name: 'voice-assistant',
       builder: (context, state) => const VoiceAssistantScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );
