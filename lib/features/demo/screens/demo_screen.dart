@@ -155,17 +155,17 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                   // Route Progress Bar
                   const SizedBox(height: 6),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(3),
                     child: LinearProgressIndicator(
                       value: progress,
                       backgroundColor: AppColors.panel,
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.amber),
-                      minHeight: 3,
+                      minHeight: 6,
                     ),
                   ),
 
                   // Spoken Voice Subtitle Banner (HUD Assistant live voice readout)
-                  if (voiceSubtitle.isNotEmpty) ...[
+                  if (voiceSubtitle.isNotEmpty && currentWp.riskZoneAlert == null) ...[
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
@@ -210,11 +210,7 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
-                            color: AppColors.danger,
-                            size: 24,
-                          ),
+                          const _PulsingWarningIcon(),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -222,9 +218,10 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                               children: [
                                 Text(
                                   'PHASE 3 ACCIDENT RISK WARNING',
-                                  style: AppTypography.caption.copyWith(
+                                  style: AppTypography.bodySmall.copyWith(
                                     color: AppColors.danger,
                                     fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -232,7 +229,7 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                                   currentWp.riskZoneAlert!,
                                   style: AppTypography.bodySmall.copyWith(
                                     color: AppColors.textPrimary,
-                                    fontSize: 12,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ],
@@ -304,14 +301,23 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
                     // Quick Jump to Summary button
                     Align(
                       alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.fast_forward, color: AppColors.textSecondary, size: 16),
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.fast_forward, color: AppColors.textPrimary, size: 16),
                         label: Text(
                           'SKIP TO SUMMARY',
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
+                            color: AppColors.textPrimary,
                             letterSpacing: 0.5,
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: AppColors.panel.withOpacity(0.9),
+                          side: const BorderSide(color: AppColors.border),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         ),
                         onPressed: () {
                           controller.skipToEnd();
@@ -537,6 +543,50 @@ class _DemoScreenState extends ConsumerState<DemoScreen> {
             child: Text(text, style: AppTypography.caption.copyWith(color: AppColors.textPrimary)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Pulsing warning icon used by the Phase 3 alert banner — draws the eye
+/// to the flagship warning without distracting motion elsewhere.
+class _PulsingWarningIcon extends StatefulWidget {
+  const _PulsingWarningIcon();
+
+  @override
+  State<_PulsingWarningIcon> createState() => _PulsingWarningIconState();
+}
+
+class _PulsingWarningIconState extends State<_PulsingWarningIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 1.0, end: 1.3).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: const Icon(
+        Icons.warning_amber_rounded,
+        color: AppColors.danger,
+        size: 26,
       ),
     );
   }
