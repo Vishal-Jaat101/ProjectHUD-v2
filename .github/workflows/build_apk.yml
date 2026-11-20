@@ -84,6 +84,8 @@ jobs:
 
       - name: Install Dependencies
         run: flutter pub get
+      - name: Configure Web Platform
+      run: flutter create . --platforms web --project-name project_hud
 
       - name: Build Web Release
         run: flutter build web --release --base-href /ProjectHUD-v2/
