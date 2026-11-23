@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Release APK
         run: |
-          flutter build apk --release --no-tree-shake-icons
+          flutter build apk --release --no-tree-shake-icons --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -55,7 +55,6 @@ jobs:
           name: "ProjectHUD v1.0.${{ github.run_number }}"
           body: |
             ## ProjectHUD Release APK (Real Product Mode)
-            
             - Built with Flutter Stable on clean CI
             - Real Google Places live destination search & Google Directions routing
             - Real GPS stream speed display and turn-by-turn maneuvers
@@ -63,6 +62,7 @@ jobs:
             - Firestore hazard reporting and 5-confirmation consensus
             - 12-byte compact BLE HUD Simulator data link
             - Phase 3 predictive accident-risk scoring & sensor telemetry
+
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
         run: flutter create . --platforms web --project-name project_hud
 
       - name: Build Web Release
-        run: flutter build web --release --base-href /ProjectHUD-v2/
+        run: flutter build web --release --base-href /ProjectHUD-v2/ --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
