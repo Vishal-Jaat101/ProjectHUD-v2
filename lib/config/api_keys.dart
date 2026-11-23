@@ -1,10 +1,8 @@
 /// API keys configuration for ProjectHUD.
 ///
-/// Encoded with runtime decoding to prevent GitHub Push Protection
-/// from blocking commits to the public repository.
-import 'dart:convert';
-
-String _decode(String s) => utf8.decode(base64.decode(s));
-
-final String geminiApiKey = _decode("QVEuQWI4Uk42S2dsc2M3ZXpaQmN5b084S1Q2TmpkWXRZc0d1a0dRTS0wYUI5ODQ5VDd5N0E=");
-final String googleMapsApiKey = _decode("QUl6YVN5QWdFOWgtZE5Fdk9DSXIzNWJXZ0hON0xyTVMtM2dtQnBB");
+/// API keys are supplied at build time with --dart-define
+/// (for example, from GitHub Actions secrets) and are never
+/// committed to the repository. When no value is supplied,
+/// the keys default to an empty string.
+final String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
+final String googleMapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
